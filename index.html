@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>German Bureaucracy Helper</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen p-6">
+    <div class="max-w-4xl mx-auto space-y-8">
+        
+        <!-- Header -->
+        <header class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <h1 class="text-3xl font-extrabold text-blue-600">🇩🇪 German Bureaucracy Helper</h1>
+            <p class="text-slate-500 mt-1">Your full-stack assistant for navigating life in Germany.</p>
+        </header>
+
+        <!-- Section 1: Database-Driven Guides -->
+        <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-slate-700">📋 Bureaucracy Guides (Loaded from Database)</h2>
+                <button onclick="loadGuides()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium text-sm">
+                    Refresh Guides
+                </button>
+            </div>
+            <div id="guides-list" class="grid gap-4 md:grid-cols-2">
+                <p class="text-slate-400 italic">Click "Refresh Guides" to load data from the database.</p>
+            </div>
+        </section>
+
+        <!-- Section 2: Email Generator -->
+        <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <h2 class="text-xl font-bold text-slate-700 mb-4">✉️ Formal German Email Generator</h2>
+            <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Topic / Issue</label>
+                    <input type="text" id="topic" placeholder="e.g. Wohnungswechsel" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Your Name</label>
+                    <input type="text" id="sender" value="Max Mustermann" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+            </div>
+            <button onclick="generateEmail()" class="mt-4 bg-emerald-600 text-white px-5 py-2 rounded-lg hover:bg-emerald-700 font-medium">
+                Generate Email Draft
+            </button>
+
+            <div id="email-result" class="mt-4 hidden p-4 bg-slate-50 border rounded-xl whitespace-pre-wrap font-mono text-sm text-slate-700"></div>
+        </section>
+
+    </div>
+
+    <script>
+        const API_URL = "http://127.0.0.1:8000";
+
+        async function loadGuides() {
+            try {
+                const res = await fetch(`${API_URL}/guides`);
+                const data = await res.json();
+                const container = document.getElementById('guides-list');
+                container.innerHTML = '';
+
+                data.guides.forEach(guide => {
+                    let stepsHtml = guide.steps.map(s => `<li class="text-sm text-slate-600 list-disc ml-4">${s}</li>`).join('');
+                    container.innerHTML += `
+                        <div class="p-4 border rounded-xl bg-slate-50 border-slate-200">
+                            <h3 class="font-bold text-blue-900 mb-2">${guide.title}</h3>
+                            <ul class="space-y-1">${stepsHtml}</ul>
+                        </div>
+                    `;
+                });
+            } catch (err) {
+                alert("Could not connect to FastAPI backend!");
+            }
+        }
+
+        async function generateEmail() {
+            const topic = document.getElementById('topic').value;
+            const sender_name = document.getElementById('sender').value;
+
+            const res = await fetch(`${API_URL}/generate-email`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ topic, sender_name })
+            });
+            const data = await res.json();
+            
+            const resultBox = document.getElementById('email-result');
+            resultBox.classList.remove('hidden');
+            resultBox.innerText = `Subject: ${data.subject}\n\n${data.body}`;
+        }
+
+        // Load guides automatically when page opens
+        loadGuides();
+    </script>
+</body>
+</html>
