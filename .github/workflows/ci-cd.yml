@@ -27,3 +27,9 @@ jobs:
           push: false # Wir wollen es hier nur testen, noch nicht in eine Registry hochladen
           load: true  # Lädt das Image in den lokalen Docker-Speicher des Runners zum Testen
           tags: german-helper:latest
+          # Hier übergeben wir die Secrets sicher an den Docker-Build:
+          build-args: |
+            POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
