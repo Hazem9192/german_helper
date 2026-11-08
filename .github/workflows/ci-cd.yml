@@ -1,0 +1,25 @@
+name: CI/CD Pipeline
+
+
+on: 
+  push:
+   branches: [ main, master ]
+  pull_request:
+   branches: [ main, master ]
+
+
+jobs:
+ build-and-test:
+  runs-on: ubuntu-latest
+
+  steps:
+   - name: Code auschecken
+     uses: actions/checkout@v4
+
+   - name: Docker Compose einrichten
+     uses: docker/setup-buildx-action@v3
+
+   - name: Docker Container bauen (build Test)
+     run:
+      echo "Teste den Docker Build..."
+      docker compose build
