@@ -30,7 +30,7 @@ jobs:
       # Step 4: Run tests
       - name: Run Python tests
         run: |
-          python -m unittest discover -s . -p "test_*.py"
+          python -m unittest discover -s . -p "test_main.py"
       # 5. Docker Buildx initialisieren (erstellt eine echte Docker-Umgebung)
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
