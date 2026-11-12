@@ -29,7 +29,7 @@ jobs:
 
       # Step 4: Run tests
       - name: Run Python tests
-        run: pytest
+        run: PYTHONPATH=. pytest
 
       # 5. Docker Buildx initialisieren (erstellt eine echte Docker-Umgebung)
       - name: Set up Docker Buildx
