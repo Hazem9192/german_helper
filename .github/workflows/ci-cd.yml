@@ -11,38 +11,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Code von GitHub laden
       - name: Code auschecken
         uses: actions/checkout@v4
 
-      # 2. Set Up Python 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.13'
 
-      # 3. Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 4. Run tests
       - name: Run Python tests
         run: PYTHONPATH=. pytest
 
-      # 5. Login to Docker Hub
       - name: Login to Docker Hub
         uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 6. Docker Buildx initialisieren
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # 7. Docker-Image bauen und zu Docker Hub pushen
       - name: Docker-Container bauen und pushen
         uses: docker/build-push-action@v5
         with:
@@ -50,28 +43,24 @@ jobs:
           push: true
           tags: hazem9192/german-helper:latest
 
-
   deploy:
     needs: build-and-test
-    runs-on: ubuntu
+    runs-on: ubuntu-latest
     steps:
-      - name: Deploy to oracle Cloud via ssh
+      - name: Deploy to Oracle Cloud via SSH
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ubuntu
           key: ${{ secrets.SSH_ACCESS_KEY }}
           script: |
-             cd ~/german-helper
-             git pull origin main
-# .env-Datei auf dem Server automatisch aus GitHub Secrets generieren
+            cd ~/german_helper
+            git pull origin main
             echo "DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@db:5432/${{ secrets.POSTGRES_DB }}" > .env
             echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
             echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
             echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
-
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
             docker compose pull
             docker compose down
-            docker compose up -d --build
-
+            docker compose up -d
