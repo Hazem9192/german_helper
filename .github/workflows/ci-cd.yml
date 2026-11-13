@@ -55,7 +55,7 @@ jobs:
             POSTGRES_DB=${{ secrets.POSTGRES_DB }}
             DATABASE_URL=${{ secrets.DATABASE_URL }}
   deploy:
-    needs: build
+    needs: build-and-test
     runs-on: ubuntu
     steps:
       - name: checkout code
