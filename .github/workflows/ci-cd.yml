@@ -54,3 +54,24 @@ jobs:
             POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
             POSTGRES_DB=${{ secrets.POSTGRES_DB }}
             DATABASE_URL=${{ secrets.DATABASE_URL }}
+deploy:
+ needs: build
+ runs-on: ubuntu
+ steps:
+  - name: checkout code
+    uses: actions/checkout@v4
+  - name: Create .env and deploy on Oracle cloud via ssh
+    uses: appleboy/ssh-action@master
+    with:
+     host: ${{ secrets.SERVER_HOST }}
+     username: ubuntu
+     key: ${{ secrets.SSH_ACCESS_KEY }}
+     script: |
+       cd ~/german-helper
+       git pull origin main
+       echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+       echo "${{ secrets.POSTGRES_VARIABLES }}" > .env
+
+       docker compose down
+       docker compose up -d --build
+
